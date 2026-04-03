@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SpyderYoutube | Secure Video Viewer</title>
+<!-- Updated Tab Title -->
+<title>Home - Classroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -10,7 +11,8 @@ body {
     margin: 0;
     background: black;
     color: white;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
 }
 
 /* NAVBAR */
@@ -19,11 +21,14 @@ body {
     padding: 10px 20px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #222;
 }
 
 .title {
     font-size: 18px;
-    cursor: pointer;
+    font-weight: bold;
+    color: #ff0000;
 }
 
 /* HOME */
@@ -34,19 +39,27 @@ body {
 
 .bigtitle {
     font-size: 48px;
-    background: linear-gradient(to right, red, yellow);
+    background: linear-gradient(to right, #ff0000, #ffcc00);
     -webkit-background-clip: text;
     color: transparent;
+    font-weight: 900;
 }
 
 .searchbar {
     width: 60%;
     padding: 15px;
     font-size: 18px;
-    background: #333;
-    border-radius: 10px;
-    border: none;
+    background: #222;
+    border-radius: 30px;
+    border: 1px solid #444;
     color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+.searchbar:focus {
+    border-color: red;
+    box-shadow: 0 0 10px rgba(255,0,0,0.2);
 }
 
 /* VIEWER */
@@ -54,6 +67,7 @@ body {
     display: none;
     height: calc(100vh - 50px);
     position: relative;
+    background: #000;
 }
 
 iframe {
@@ -65,25 +79,33 @@ iframe {
 /* SHORTS BUTTONS */
 .arrow {
     position: absolute;
-    right: 10px;
-    font-size: 28px;
-    background: rgba(0,0,0,0.6);
-    padding: 10px;
+    right: 20px;
+    font-size: 32px;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
     cursor: pointer;
+    border-radius: 50%;
+    user-select: none;
+    transition: 0.2s;
+    z-index: 10;
 }
 
-.up { top: 40%; }
+.arrow:hover { background: rgba(255,255,255,0.3); }
+.up { top: 35%; }
 .down { top: 55%; }
 
 /* BACK BUTTON */
 .back {
     position: fixed;
-    bottom: 15px;
-    right: 15px;
-    background: #222;
-    padding: 10px 15px;
-    border-radius: 8px;
+    bottom: 20px;
+    left: 20px;
+    background: #ff0000;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
     cursor: pointer;
+    font-weight: bold;
+    z-index: 100;
 }
 
 /* HISTORY PANEL */
@@ -91,26 +113,39 @@ iframe {
     position: fixed;
     right: 0;
     top: 50px;
-    width: 240px;
+    width: 260px;
     height: calc(100vh - 50px);
-    background: #111;
-    overflow-y: auto;
-    transition: transform 0.3s;
+    background: #0a0a0a;
+    border-left: 1px solid #222;
+    transition: transform 0.3s ease;
+    z-index: 20;
 }
 
-.panel.hidden {
-    transform: translateX(100%);
-}
+.panel.hidden { transform: translateX(100%); }
 
 .item {
-    padding: 8px;
+    padding: 12px;
     border-bottom: 1px solid #222;
     cursor: pointer;
+    font-size: 14px;
+    color: #aaa;
 }
 
+.item:hover { background: #1a1a1a; color: white; }
+
 .controls {
-    padding: 8px;
-    border-bottom: 1px solid #333;
+    padding: 10px;
+    background: #151515;
+    text-align: center;
+}
+
+button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -118,34 +153,32 @@ iframe {
 <body>
 
 <div class="navbar">
-    <div class="title">SpyderYoutube Control Panel</div>
-    <button onclick="togglePanel()">Toggle History</button>
+    <!-- Updated Heading -->
+    <div class="title">SpyderYoutube</div>
+    <button onclick="togglePanel()">History</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="center">
     <div class="bigtitle">SpyderYoutube</div>
-    <p>Now with SafeShareTV and Youtube Shorts Partnership!</p>
+    <p>SafeShareTV & Shorts Partnership active.</p>
 
     <input id="search" class="searchbar"
-    placeholder="Paste a YouTube URL to begin"
+    placeholder="Paste YouTube Link (Shorts or Videos)"
     onkeypress="handleEnter(event)">
 </div>
 
-<!-- VIEW -->
 <div id="viewer" class="viewer">
-    <iframe id="frame"></iframe>
+    <iframe id="frame" allowfullscreen></iframe>
 
-    <div id="upArrow" class="arrow up" onclick="prevShort()">⬆️</div>
-    <div id="downArrow" class="arrow down" onclick="nextShort()">⬇️</div>
+    <div id="upArrow" class="arrow up" onclick="navShort('prev')">⬆️</div>
+    <div id="downArrow" class="arrow down" onclick="navShort('next')">⬇️</div>
 </div>
 
-<div class="back" onclick="goHome()">Back to Home</div>
+<div class="back" onclick="goHome()">🏠 Home</div>
 
-<!-- HISTORY -->
-<div id="panel" class="panel">
+<div id="panel" class="panel hidden">
     <div class="controls">
-        <button onclick="clearHistory()">Clear</button>
+        <button onclick="clearHistory()">Clear History</button>
     </div>
     <div id="history"></div>
 </div>
@@ -154,102 +187,90 @@ iframe {
 let historyList = JSON.parse(localStorage.getItem("h") || "[]");
 let shortStack = [];
 let currentIndex = -1;
-let isShort = false;
 
-/* ENTER */
+// Keywords to simulate "related" random shorts
+const keywords = ["gaming", "coding", "funny", "memes", "tech", "lofi", "satisfying"];
+
 function handleEnter(e) {
     if (e.key === "Enter") {
         let url = document.getElementById("search").value.trim();
-
-        if (!url.includes("youtube")) {
-            alert("Only YouTube URLs allowed");
-            return;
-        }
-
+        if (!url.includes("youtube")) return alert("Please use a YouTube link");
         openVideo(url);
     }
 }
 
-/* EXTRACT ID */
 function getID(url) {
     try {
+        if (url.includes("shorts/")) return url.split("shorts/")[1].split("?")[0];
         let u = new URL(url);
-        if (u.hostname === "youtu.be") return u.pathname.slice(1);
-        if (u.pathname.includes("/shorts/")) return u.pathname.split("/shorts/")[1];
-        return u.searchParams.get("v");
-    } catch {
-        return null;
-    }
+        return u.hostname === "youtu.be" ? u.pathname.slice(1) : u.searchParams.get("v");
+    } catch { return null; }
 }
 
-/* OPEN VIDEO */
 function openVideo(url) {
     let id = getID(url);
     if (!id) return alert("Invalid URL");
 
-    isShort = url.includes("shorts");
-
+    let isShort = url.includes("shorts");
+    
+    // Applying the "yout-ube" logic to all embeds
     let embed = `https://www.yout-ube.com/embed/${id}`;
-
+    
     document.getElementById("frame").src = embed;
-
     document.getElementById("home").style.display = "none";
     document.getElementById("viewer").style.display = "block";
 
-    document.getElementById("upArrow").style.display = isShort ? "block" : "none";
-    document.getElementById("downArrow").style.display = isShort ? "block" : "none";
+    // Show arrows for both to allow "random" discovery, or just shorts
+    document.getElementById("upArrow").style.display = "block";
+    document.getElementById("downArrow").style.display = "block";
 
     saveHistory(id);
-
-    if (isShort) {
-        shortStack.push(id);
-        currentIndex = shortStack.length - 1;
-    }
-}
-
-/* SHORTS NAV */
-function nextShort() {
-    let id = Math.random().toString(36).substring(2, 13);
-    loadShort(id);
-}
-
-function prevShort() {
-    if (currentIndex > 0) {
-        currentIndex--;
-        loadShort(shortStack[currentIndex]);
-    }
-}
-
-function loadShort(id) {
-    document.getElementById("frame").src =
-        `https://www.yout-ube.com/embed/${id}`;
-
+    
     shortStack.push(id);
     currentIndex = shortStack.length - 1;
 }
 
-/* HOME */
+function navShort(dir) {
+    if (dir === 'prev' && currentIndex > 0) {
+        currentIndex--;
+        loadVideo(shortStack[currentIndex]);
+    } else {
+        // Generate a random-ish ID (simulating a related shuffle)
+        // In a real app, you'd fetch from an API, here we cycle or randomize
+        let newId = Math.random().toString(36).substring(2, 13);
+        shortStack.push(newId);
+        currentIndex = shortStack.length - 1;
+        loadVideo(newId);
+    }
+}
+
+function loadVideo(id) {
+    // Ensuring the hyphenated domain is used
+    document.getElementById("frame").src = `https://www.yout-ube.com/embed/${id}?autoplay=1`;
+    saveHistory(id);
+}
+
 function goHome() {
     document.getElementById("viewer").style.display = "none";
     document.getElementById("home").style.display = "block";
     document.getElementById("frame").src = "";
 }
 
-/* HISTORY */
 function saveHistory(id) {
-    historyList.unshift(id);
-    localStorage.setItem("h", JSON.stringify(historyList.slice(0, 20)));
-    renderHistory();
+    if(!historyList.includes(id)) {
+        historyList.unshift(id);
+        localStorage.setItem("h", JSON.stringify(historyList.slice(0, 30)));
+        renderHistory();
+    }
 }
 
 function renderHistory() {
     let el = document.getElementById("history");
     el.innerHTML = "";
-
     historyList.forEach(i => {
         let d = document.createElement("div");
         d.className = "item";
-        d.innerText = i;
+        d.innerText = "Video ID: " + i;
         d.onclick = () => openVideo("https://youtube.com/watch?v=" + i);
         el.appendChild(d);
     });
@@ -261,12 +282,10 @@ function clearHistory() {
     renderHistory();
 }
 
-/* PANEL */
 function togglePanel() {
     document.getElementById("panel").classList.toggle("hidden");
 }
 
-/* INIT */
 renderHistory();
 </script>
 
