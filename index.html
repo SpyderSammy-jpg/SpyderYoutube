@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpyderYoutube</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    background: black;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    background: #111;
+    padding: 10px 20px;
+    gap: 20px;
+}
+
+.navbar button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.navbar button:hover {
+    color: red;
+}
+
+/* HOME */
+.center {
+    text-align: center;
+    margin-top: 120px;
+}
+
+.title {
+    font-size: 50px;
+    font-weight: bold;
+    background: linear-gradient(to right, red, yellow);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.splash {
+    margin: 15px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.searchbar {
+    width: 60%;
+    padding: 15px;
+    font-size: 18px;
+    background: #333;
+    border: none;
+    border-radius: 10px;
+    color: white;
+}
+
+/* VIEWER */
+.viewer {
+    display: none;
+    width: 100%;
+    height: calc(100vh - 50px);
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* SHORTS BUTTONS */
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    cursor: pointer;
+    padding: 10px;
+    background: rgba(0,0,0,0.5);
+}
+
+.left { left: 10px; }
+.right { right: 10px; }
+
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <button onclick="showHome()">YouTube</button>
+    <button onclick="openProxy()">Proxy</button>
+</div>
+
+<div id="home" class="center">
+    <div class="title">SpyderYoutube</div>
+    
+    <div class="splash">
+        Now with SafeShareTV and Youtube Shorts Partnership!
+    </div>
+
+    <input class="searchbar" id="search"
+        placeholder="Type a youtube video to start SpyderView"
+        onkeypress="handleEnter(event)">
+</div>
+
+<div id="viewer" class="viewer">
+    <iframe id="frame"></iframe>
+
+    <div id="leftArrow" class="arrow left" onclick="prevShort()">⬅️</div>
+    <div id="rightArrow" class="arrow right" onclick="nextShort()">➡️</div>
+</div>
+
+<script>
+function handleEnter(e) {
+    if (e.key === "Enter") {
+        let url = document.getElementById("search").value.trim();
+
+        if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
+            alert("Only YouTube URLs allowed!");
+            return;
+        }
+
+        loadVideo(url);
+    }
+}
+
+function extractVideoID(url) {
+    try {
+        let u = new URL(url);
+
+        if (u.hostname === "youtu.be") {
+            return u.pathname.slice(1);
+        }
+
+        if (u.pathname.includes("/shorts/")) {
+            return u.pathname.split("/shorts/")[1];
+        }
+
+        return u.searchParams.get("v");
+    } catch {
+        return null;
+    }
+}
+
+let currentShortID = null;
+
+function loadVideo(url) {
+    let id = extractVideoID(url);
+    if (!id) {
+        alert("Invalid YouTube URL!");
+        return;
+    }
+
+    currentShortID = id;
+
+    let isShort = url.includes("/shorts/");
+
+    let embedURL = isShort
+        ? `https://www.youtube.com/embed/${id}`
+        : `https://www.youtube.com/embed/${id}`;
+
+    document.getElementById("frame").src = embedURL;
+
+    document.getElementById("home").style.display = "none";
+    document.getElementById("viewer").style.display = "block";
+
+    document.getElementById("leftArrow").style.display = isShort ? "block" : "none";
+    document.getElementById("rightArrow").style.display = isShort ? "block" : "none";
+}
+
+function showHome() {
+    document.getElementById("viewer").style.display = "none";
+    document.getElementById("home").style.display = "block";
+    document.getElementById("frame").src = "";
+}
+
+function openProxy() {
+    document.getElementById("home").style.display = "none";
+    document.getElementById("viewer").style.display = "block";
+
+    document.getElementById("frame").src = "https://spyder-network.vercel.app";
+
+    document.getElementById("leftArrow").style.display = "none";
+    document.getElementById("rightArrow").style.display = "none";
+}
+
+/* SHORTS NAVIGATION (random related-ish) */
+function nextShort() {
+    randomShort();
+}
+
+function prevShort() {
+    randomShort();
+}
+
+function randomShort() {
+    let randomID = Math.random().toString(36).substring(2, 13);
+    document.getElementById("frame").src =
+        `https://www.youtube.com/embed/${randomID}`;
+}
+</script>
+
+</body>
+</html>
