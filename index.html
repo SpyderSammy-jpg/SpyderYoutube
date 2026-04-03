@@ -6,123 +6,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-    margin: 0;
-    background: black;
-    color: white;
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
-}
+body { margin: 0; background: black; color: white; font-family: Arial, sans-serif; overflow: hidden; }
+.navbar { background: #111; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+.title { font-size: 18px; font-weight: bold; color: #ff0000; }
+.center { text-align: center; margin-top: 100px; }
+.bigtitle { font-size: 48px; background: linear-gradient(to right, #ff0000, #ffcc00); -webkit-background-clip: text; color: transparent; font-weight: 900; margin-bottom: 20px; }
+.search-container { width: 60%; margin: 0 auto; position: relative; }
+.searchbar { width: 100%; padding: 15px; font-size: 18px; background: #222; border-radius: 30px; border: 1px solid #444; color: white; outline: none; }
 
-.navbar {
-    background: #111;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #222;
-}
+/* SUGGESTIONS */
+.suggestions { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+.chip { background: #333; padding: 8px 15px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; border: 1px solid #444; }
+.chip:hover { background: #ff0000; border-color: #ff0000; }
 
-.title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #ff0000;
-}
+/* VIEWER */
+.viewer { display: none; height: calc(100vh - 50px); position: relative; background: #000; }
+iframe { width: 100%; height: 100%; border: none; }
 
-.center {
-    text-align: center;
-    margin-top: 120px;
-}
-
-.bigtitle {
-    font-size: 48px;
-    background: linear-gradient(to right, #ff0000, #ffcc00);
-    -webkit-background-clip: text;
-    color: transparent;
-    font-weight: 900;
-}
-
-.searchbar {
-    width: 60%;
-    padding: 15px;
-    font-size: 18px;
-    background: #222;
-    border-radius: 30px;
-    border: 1px solid #444;
-    color: white;
-    outline: none;
-}
-
-.viewer {
-    display: none;
-    height: calc(100vh - 50px);
-    position: relative;
-    background: #000;
-}
-
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-.arrow {
-    position: absolute;
-    right: 20px;
-    font-size: 32px;
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    cursor: pointer;
-    border-radius: 50%;
-    user-select: none;
-    z-index: 10;
-}
-
+/* CONTROLS */
+.arrow { position: absolute; right: 20px; font-size: 32px; background: rgba(0,0,0,0.6); padding: 15px; cursor: pointer; border-radius: 50%; user-select: none; z-index: 10; }
 .up { top: 35%; }
 .down { top: 55%; }
+.pip-btn { position: absolute; bottom: 20px; right: 80px; background: #444; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 100; font-size: 12px; }
 
-.back {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: #ff0000;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    z-index: 100;
-}
-
-.panel {
-    position: fixed;
-    right: 0;
-    top: 50px;
-    width: 260px;
-    height: calc(100vh - 50px);
-    background: #0a0a0a;
-    border-left: 1px solid #222;
-    transition: transform 0.3s ease;
-    z-index: 20;
-}
-
+.back { position: fixed; bottom: 20px; left: 20px; background: #ff0000; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; z-index: 100; }
+.panel { position: fixed; right: 0; top: 50px; width: 260px; height: calc(100vh - 50px); background: #0a0a0a; border-left: 1px solid #222; transition: 0.3s; z-index: 20; overflow-y: auto; }
 .panel.hidden { transform: translateX(100%); }
-
-.item {
-    padding: 12px;
-    border-bottom: 1px solid #222;
-    cursor: pointer;
-    font-size: 14px;
-    color: #aaa;
-}
-
-.controls { padding: 10px; text-align: center; }
-button { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+.item { padding: 12px; border-bottom: 1px solid #222; cursor: pointer; font-size: 12px; color: #aaa; }
 </style>
 </head>
 
 <body>
-
 <div class="navbar">
     <div class="title">SpyderYoutube</div>
     <button onclick="togglePanel()">History</button>
@@ -130,86 +44,79 @@ button { background: #333; color: white; border: none; padding: 8px 15px; border
 
 <div id="home" class="center">
     <div class="bigtitle">SpyderYoutube</div>
-    <p>SafeShareTV & Shorts Partnership active.</p>
-
-    <input id="search" class="searchbar"
-    placeholder="Paste YouTube Link (Shorts or Videos)"
-    onkeypress="handleEnter(event)">
+    <div class="search-container">
+        <input id="search" class="searchbar" placeholder="Paste YouTube Link" onkeypress="handleEnter(event)">
+        <div class="suggestions">
+            <div class="chip" onclick="quickLoad('L_jWHffIx5E')">Minecraft</div>
+            <div class="chip" onclick="quickLoad('jfKfPfyJRdk')">Lo-Fi Radio</div>
+            <div class="chip" onclick="quickLoad('3JZ_D3ELwOQ')">Satisfying</div>
+            <div class="chip" onclick="quickLoad('aqz-KE-bpKQ')">Memes</div>
+        </div>
+    </div>
 </div>
 
 <div id="viewer" class="viewer">
-    <iframe id="frame" allowfullscreen></iframe>
-    <div id="upArrow" class="arrow up" onclick="navShort('prev')">⬆️</div>
-    <div id="downArrow" class="arrow down" onclick="navShort('next')">⬇️</div>
+    <iframe id="frame" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+    <div class="arrow up" onclick="navShort(-1)">⬆️</div>
+    <div class="arrow down" onclick="navShort(1)">⬇️</div>
+    <div class="pip-btn" onclick="togglePiP()">Picture-in-Picture</div>
 </div>
 
 <div class="back" onclick="goHome()">🏠 Home</div>
 
 <div id="panel" class="panel hidden">
-    <div class="controls">
-        <button onclick="clearHistory()">Clear History</button>
-    </div>
     <div id="history"></div>
 </div>
 
 <script>
 let historyList = JSON.parse(localStorage.getItem("h") || "[]");
-let shortStack = [];
+let videoPool = ["L_jWHffIx5E", "jfKfPfyJRdk", "3JZ_D3ELwOQ", "aqz-KE-bpKQ", "dQw4w9WgXcQ"];
 let currentIndex = -1;
 
 function handleEnter(e) {
     if (e.key === "Enter") {
-        let url = document.getElementById("search").value.trim();
-        if (!url.includes("youtube")) return alert("Please use a YouTube link");
-        openVideo(url);
+        let val = document.getElementById("search").value.trim();
+        let id = extractID(val);
+        if (id) {
+            if (!videoPool.includes(id)) videoPool.push(id);
+            currentIndex = videoPool.indexOf(id);
+            loadVideo(id);
+        } else { alert("Paste a valid YouTube or Shorts link!"); }
     }
 }
 
-function getID(url) {
-    try {
-        if (url.includes("shorts/")) return url.split("shorts/")[1].split("?")[0];
-        let u = new URL(url);
-        return u.hostname === "youtu.be" ? u.pathname.slice(1) : u.searchParams.get("v");
-    } catch { return null; }
+function extractID(url) {
+    // Regex for standard, shorts, and mobile links
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[7].length === 11) return match[7];
+    if (url.includes("shorts/")) return url.split("shorts/")[1].split("?")[0].split("/")[0];
+    return null;
 }
 
-function openVideo(url) {
-    let id = getID(url);
-    if (!id) return alert("Invalid URL");
-
-    loadVideo(id);
-    document.getElementById("home").style.display = "none";
-    document.getElementById("viewer").style.display = "block";
-}
-
-function navShort(dir) {
-    if (dir === 'prev' && currentIndex > 0) {
-        currentIndex--;
-        loadVideo(shortStack[currentIndex]);
-    } else {
-        // Generates a random 11-char ID and ensures it loads via yout-ube.com
-        let newId = generateRandomID();
-        shortStack.push(newId);
-        currentIndex = shortStack.length - 1;
-        loadVideo(newId);
-    }
-}
-
-// Generates a string formatted like a YouTube ID
-function generateRandomID() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    let result = "";
-    for (let i = 0; i < 11; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
+function quickLoad(id) { loadVideo(id); }
 
 function loadVideo(id) {
-    // CRITICAL FIX: Forces the use of yout-ube.com for all navigation
-    const embedUrl = `https://yout-ube.com{id}?autoplay=1`;
-    document.getElementById("frame").src = embedUrl;
+    // Force the hyphenated domain
+    const unblockedUrl = `https://yout-ube.com{id}?autoplay=1&rel=0`;
+    document.getElementById("frame").src = unblockedUrl;
+    document.getElementById("home").style.display = "none";
+    document.getElementById("viewer").style.display = "block";
     saveHistory(id);
+}
+
+function navShort(step) {
+    currentIndex += step;
+    if (currentIndex < 0) currentIndex = videoPool.length - 1;
+    if (currentIndex >= videoPool.length) currentIndex = 0;
+    loadVideo(videoPool[currentIndex]);
+}
+
+function togglePiP() {
+    const frame = document.getElementById("frame");
+    // Some browsers require interaction or specific API, 
+    // but the 'allow' attribute above enables the player's internal PiP button.
+    alert("Use the button inside the video player (bottom right) for PiP!");
 }
 
 function goHome() {
@@ -221,7 +128,7 @@ function goHome() {
 function saveHistory(id) {
     if(!historyList.includes(id)) {
         historyList.unshift(id);
-        localStorage.setItem("h", JSON.stringify(historyList.slice(0, 30)));
+        localStorage.setItem("h", JSON.stringify(historyList.slice(0, 20)));
         renderHistory();
     }
 }
@@ -232,25 +139,15 @@ function renderHistory() {
     historyList.forEach(i => {
         let d = document.createElement("div");
         d.className = "item";
-        d.innerText = "Video: " + i;
-        // History items also use the unblocked link logic
+        d.innerText = "Watch again: " + i;
         d.onclick = () => loadVideo(i);
         el.appendChild(d);
     });
 }
 
-function clearHistory() {
-    historyList = [];
-    localStorage.removeItem("h");
-    renderHistory();
-}
-
-function togglePanel() {
-    document.getElementById("panel").classList.toggle("hidden");
-}
+function togglePanel() { document.getElementById("panel").classList.toggle("hidden"); }
 
 renderHistory();
 </script>
-
 </body>
 </html>
