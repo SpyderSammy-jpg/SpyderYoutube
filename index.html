@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- Updated Tab Title -->
 <title>Home - Classroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -15,7 +14,6 @@ body {
     overflow-x: hidden;
 }
 
-/* NAVBAR */
 .navbar {
     background: #111;
     padding: 10px 20px;
@@ -31,7 +29,6 @@ body {
     color: #ff0000;
 }
 
-/* HOME */
 .center {
     text-align: center;
     margin-top: 120px;
@@ -54,15 +51,8 @@ body {
     border: 1px solid #444;
     color: white;
     outline: none;
-    transition: 0.3s;
 }
 
-.searchbar:focus {
-    border-color: red;
-    box-shadow: 0 0 10px rgba(255,0,0,0.2);
-}
-
-/* VIEWER */
 .viewer {
     display: none;
     height: calc(100vh - 50px);
@@ -76,7 +66,6 @@ iframe {
     border: none;
 }
 
-/* SHORTS BUTTONS */
 .arrow {
     position: absolute;
     right: 20px;
@@ -86,15 +75,12 @@ iframe {
     cursor: pointer;
     border-radius: 50%;
     user-select: none;
-    transition: 0.2s;
     z-index: 10;
 }
 
-.arrow:hover { background: rgba(255,255,255,0.3); }
 .up { top: 35%; }
 .down { top: 55%; }
 
-/* BACK BUTTON */
 .back {
     position: fixed;
     bottom: 20px;
@@ -108,7 +94,6 @@ iframe {
     z-index: 100;
 }
 
-/* HISTORY PANEL */
 .panel {
     position: fixed;
     right: 0;
@@ -131,29 +116,14 @@ iframe {
     color: #aaa;
 }
 
-.item:hover { background: #1a1a1a; color: white; }
-
-.controls {
-    padding: 10px;
-    background: #151515;
-    text-align: center;
-}
-
-button {
-    background: #333;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+.controls { padding: 10px; text-align: center; }
+button { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
 </style>
 </head>
 
 <body>
 
 <div class="navbar">
-    <!-- Updated Heading -->
     <div class="title">SpyderYoutube</div>
     <button onclick="togglePanel()">History</button>
 </div>
@@ -169,7 +139,6 @@ button {
 
 <div id="viewer" class="viewer">
     <iframe id="frame" allowfullscreen></iframe>
-
     <div id="upArrow" class="arrow up" onclick="navShort('prev')">⬆️</div>
     <div id="downArrow" class="arrow down" onclick="navShort('next')">⬇️</div>
 </div>
@@ -187,9 +156,6 @@ button {
 let historyList = JSON.parse(localStorage.getItem("h") || "[]");
 let shortStack = [];
 let currentIndex = -1;
-
-// Keywords to simulate "related" random shorts
-const keywords = ["gaming", "coding", "funny", "memes", "tech", "lofi", "satisfying"];
 
 function handleEnter(e) {
     if (e.key === "Enter") {
@@ -211,23 +177,9 @@ function openVideo(url) {
     let id = getID(url);
     if (!id) return alert("Invalid URL");
 
-    let isShort = url.includes("shorts");
-    
-    // Applying the "yout-ube" logic to all embeds
-    let embed = `https://www.yout-ube.com/embed/${id}`;
-    
-    document.getElementById("frame").src = embed;
+    loadVideo(id);
     document.getElementById("home").style.display = "none";
     document.getElementById("viewer").style.display = "block";
-
-    // Show arrows for both to allow "random" discovery, or just shorts
-    document.getElementById("upArrow").style.display = "block";
-    document.getElementById("downArrow").style.display = "block";
-
-    saveHistory(id);
-    
-    shortStack.push(id);
-    currentIndex = shortStack.length - 1;
 }
 
 function navShort(dir) {
@@ -235,18 +187,28 @@ function navShort(dir) {
         currentIndex--;
         loadVideo(shortStack[currentIndex]);
     } else {
-        // Generate a random-ish ID (simulating a related shuffle)
-        // In a real app, you'd fetch from an API, here we cycle or randomize
-        let newId = Math.random().toString(36).substring(2, 13);
+        // Generates a random 11-char ID and ensures it loads via yout-ube.com
+        let newId = generateRandomID();
         shortStack.push(newId);
         currentIndex = shortStack.length - 1;
         loadVideo(newId);
     }
 }
 
+// Generates a string formatted like a YouTube ID
+function generateRandomID() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let result = "";
+    for (let i = 0; i < 11; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 function loadVideo(id) {
-    // Ensuring the hyphenated domain is used
-    document.getElementById("frame").src = `https://www.yout-ube.com/embed/${id}?autoplay=1`;
+    // CRITICAL FIX: Forces the use of yout-ube.com for all navigation
+    const embedUrl = `https://yout-ube.com{id}?autoplay=1`;
+    document.getElementById("frame").src = embedUrl;
     saveHistory(id);
 }
 
@@ -270,8 +232,9 @@ function renderHistory() {
     historyList.forEach(i => {
         let d = document.createElement("div");
         d.className = "item";
-        d.innerText = "Video ID: " + i;
-        d.onclick = () => openVideo("https://youtube.com/watch?v=" + i);
+        d.innerText = "Video: " + i;
+        // History items also use the unblocked link logic
+        d.onclick = () => loadVideo(i);
         el.appendChild(d);
     });
 }
